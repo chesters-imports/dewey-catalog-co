@@ -6,6 +6,8 @@
   <title>ROM Cat · CO.DCC-001-ROMCAT</title>
   <link rel="stylesheet" href="/rom-cart-face.css" />
   <link rel="stylesheet" href="/app.css" />
+  <link rel="stylesheet" href="/rom-page.css?v=rompage2" />
+  <link rel="stylesheet" href="/rom-editor.css?v=rompage3" />
 </head>
 <body class="rc theme-toystore">
   <div class="rc-bg" aria-hidden="true">
@@ -47,36 +49,65 @@
       <ul class="rc-bins" id="romBins"></ul>
     </section>
 
-    <!-- FORMS -->
-    <dialog class="rc-dialog" id="dlgProducer">
+    <!-- ONE ROM: readable page (Edit opens the same editor below) -->
+    <section id="viewRom" class="rc-view rc-rom-page" hidden>
+      <article id="romPage"></article>
+    </section>
+
+    <!-- FORMS (editors open as full pages inside main; same fields, same ids) -->
+    <dialog class="rc-dialog rc-editor rc-editor-producer" id="dlgProducer">
       <form method="dialog" id="formProducer" class="rc-form">
-        <h3 class="rc-form-h" id="dlgProducerTitle">Producer</h3>
+        <nav class="rc-crumbs rc-ed-crumbs" id="p_crumbs" aria-label="Breadcrumb"></nav>
+        <header class="rc-ed-head">
+          <p class="rc-kick" id="p_kick">Producer editor</p>
+          <h3 class="rc-form-h" id="dlgProducerTitle">Producer</h3>
+          <p class="rc-ed-sub" id="p_sub"></p>
+        </header>
         <input type="hidden" name="id" id="p_id" />
+        <div class="rc-ed-body">
+          <section class="rc-ed-sec rc-ed-sec-main" aria-label="About">
+            <h4 class="rc-ed-sec-h">About</h4>
         <label>Company name <input name="name" id="p_name" required /></label>
-        <label>Company chip code <input name="chip_code" id="p_chip" placeholder="CO.DCC" /></label>
         <label>Mission statement <textarea name="mission" id="p_mission" rows="3"></textarea></label>
+        <label>Free notes <textarea name="notes" id="p_notes" rows="2"></textarea></label>
+          </section>
+          <section class="rc-ed-sec" aria-label="Catalog card">
+            <h4 class="rc-ed-sec-h">Catalog card</h4>
+        <label>Company chip code <input name="chip_code" id="p_chip" placeholder="CO.DCC" /></label>
         <label>Current hands operator (VEN) <input name="hands_ven" id="p_hands" placeholder="DCO" /></label>
         <label>Address in ALICE_BOX <input name="address" id="p_address" placeholder="ALICE_BOX/…" /></label>
-        <label>Free notes <textarea name="notes" id="p_notes" rows="2"></textarea></label>
+          </section>
+        </div>
+        <p class="rc-form-err" id="p_err" hidden></p>
         <div class="rc-form-actions">
           <button type="submit" class="rc-btn rc-btn-primary" value="save">file card</button>
           <button type="button" class="rc-btn" id="p_cancel">cancel</button>
           <button type="button" class="rc-btn rc-btn-danger" id="p_delete" hidden>remove producer</button>
         </div>
-        <p class="rc-form-err" id="p_err" hidden></p>
       </form>
     </dialog>
 
-    <dialog class="rc-dialog rc-dialog-rom" id="dlgRom">
+    <dialog class="rc-dialog rc-dialog-rom rc-editor rc-editor-rom" id="dlgRom">
       <form method="dialog" id="formRom" class="rc-form rc-form-rom">
+        <nav class="rc-crumbs rc-ed-crumbs" id="r_crumbs" aria-label="Breadcrumb"></nav>
+        <header class="rc-ed-head">
+          <p class="rc-kick" id="r_kick">ROM editor</p>
         <h3 class="rc-form-h" id="dlgRomTitle">ROM</h3>
+          <p class="rc-ed-sub" id="r_sub"></p>
+        </header>
         <div class="rc-form-rom-grid">
           <div class="rc-form-rom-fields">
             <input type="hidden" name="id" id="r_id" />
             <input type="hidden" name="producer_id" id="r_producer" />
+            <section class="rc-ed-sec" aria-label="About">
+              <h4 class="rc-ed-sec-h">About</h4>
             <label>ROM name <input name="name" id="r_name" required /></label>
-            <label>ROM chip code (SKU) <input name="chip_code" id="r_chip" placeholder="CO.DCC-001-ROMCAT" /></label>
             <label>Description <textarea name="description" id="r_desc" rows="2"></textarea></label>
+            <label>Free notes <textarea name="notes" id="r_notes" rows="2"></textarea></label>
+            </section>
+            <section class="rc-ed-sec" aria-label="Catalog card">
+              <h4 class="rc-ed-sec-h">Catalog card</h4>
+            <label>ROM chip code (SKU) <input name="chip_code" id="r_chip" placeholder="CO.DCC-001-ROMCAT" /></label>
             <label>Release status
               <select name="status" id="r_status">
                 <option value="idea">idea</option>
@@ -88,6 +119,9 @@
             </label>
             <label>Address in ALICE_BOX <input name="address" id="r_address" /></label>
             <label class="rc-check"><input type="checkbox" id="r_launcher" /> Show on ROM Launcher (start menu)</label>
+            </section>
+            <section class="rc-ed-sec" aria-label="Case and plate">
+              <h4 class="rc-ed-sec-h">Case &amp; plate</h4>
             <div class="rc-case-shell-block">
               <div class="rc-case-shell-lab">Case shell</div>
               <div class="rc-case-shell-toggle" role="group" aria-label="classicboi or julie">
@@ -120,7 +154,7 @@
               <span class="rc-hint">Paste CSS for the launcher cart sticker. Leave blank for classic.</span>
               <textarea name="plate_css" id="r_plate_css" rows="3" spellcheck="false" placeholder="background: linear-gradient(160deg, #1a1020, #08060c);&#10;color: #f0c060;"></textarea>
             </label>
-            <label>Free notes <textarea name="notes" id="r_notes" rows="2"></textarea></label>
+            </section>
           </div>
           <div class="rc-plate-preview-wrap" aria-label="Full ROM case preview">
             <div class="rc-plate-preview-lab">Case preview</div>
@@ -137,18 +171,18 @@
             <span class="rc-hint">classicboi / julie · name follows field</span>
           </div>
         </div>
+        <p class="rc-form-err" id="r_err" hidden></p>
         <div class="rc-form-actions">
           <button type="submit" class="rc-btn rc-btn-primary" value="save">file card</button>
           <button type="button" class="rc-btn" id="r_cancel">cancel</button>
           <button type="button" class="rc-btn rc-btn-danger" id="r_delete" hidden>remove ROM</button>
         </div>
-        <p class="rc-form-err" id="r_err" hidden></p>
       </form>
     </dialog>
 
     <p class="rc-foot" id="foot">Dewey Catalog Co. · the braid holds if this ROM is on its own shelf</p>
   </main>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=rompage3"></script>
 </body>
 </html>

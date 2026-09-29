@@ -1,0 +1,714 @@
+/**
+ * rom-cart-face.css — TEMPORARY shared paint for classicboi + julie shells.
+ *
+ * OWNERSHIP (honest, not finished architecture):
+ *   · ROM Cat owns catalog dress-up FIELDS on each ROM:
+ *       case_shell · julie_tint · plate_css
+ *   · This file is ONLY the two base shell paints so Cat + Launcher
+ *     do not fork pixel recipes while we talk about real installable
+ *     dress-up packs (per-style CSS you include only when needed).
+ *   · Size is NOT identity — rooms set --cart-w / --cart-h.
+ *     Launcher stays dense; Cat shelf stays smaller. Percentages inside.
+ *
+ * DO NOT turn this into "every dress-up ever loaded for every ROM."
+ * That model is wrong (user law). Future: load only the case CSS a ROM installs.
+ */
+
+/* ── footprint: room-owned size, % anatomy inside ─────────── */
+.rc-plate-preview-cart,
+.rl-case {
+  position: relative;
+  width: var(--cart-w, 5.8rem);
+  height: var(--cart-h, 6.6rem);
+  margin: 0 auto;
+  border: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Cat shelf: smaller install (does not dictate Launcher) */
+.rc-rom-face.rc-plate-preview-cart,
+.rc-rom-face {
+  --cart-w: 6.5rem;
+  --cart-h: 7.5rem;
+  margin-top: 0.55rem;
+}
+
+/* Cat form preview: large enough that 1px rims stay rims */
+.rc-plate-preview-wrap .rc-plate-preview-cart {
+  --cart-w: 7.6rem;
+  --cart-h: 8.8rem;
+}
+
+.rl-case {
+  max-width: 100%;
+  cursor: pointer;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  transition: transform 0.1s ease;
+}
+.rl-case:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.rl-case:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.rl-case:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+/* ── shell body ──────────────────────────────────────────── */
+.rc-prev-shell,
+.rl-case-shell {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px 10px 2px 10px;
+  border: none;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 70%,
+    rgb(88, 88, 88),
+    rgb(66, 66, 66)
+  );
+  /* soft translucent bevels — not hard white 1px bricks */
+  box-shadow:
+    3px 3px 0 rgba(5, 6, 8, 0.18),
+    2px 2px 3px rgba(0, 0, 0, 0.35),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.28),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.35),
+    inset 2px 2px 3px rgba(255, 255, 255, 0.08),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.18),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.28);
+}
+
+/* extra toy parts — hidden until a cookbook paints them */
+.rc-prev-well,
+.rl-case-well,
+.rc-prev-shutter,
+.rl-case-shutter {
+  position: absolute;
+  pointer-events: none;
+  display: none;
+}
+
+/* julie tints — candy mass color. Geometry lives in the julie cookbook below. */
+.rc-plate-preview-cart.shell-julie.tint-red,
+.rl-case.shell-julie.tint-red { --julie: #c01830; }
+.rc-plate-preview-cart.shell-julie.tint-crimson,
+.rl-case.shell-julie.tint-crimson { --julie: #7a0018; }
+.rc-plate-preview-cart.shell-julie.tint-pink,
+.rl-case.shell-julie.tint-pink { --julie: #d02878; }
+.rc-plate-preview-cart.shell-julie.tint-purple,
+.rl-case.shell-julie.tint-purple { --julie: #5a18b8; }
+.rc-plate-preview-cart.shell-julie.tint-mint,
+.rl-case.shell-julie.tint-mint { --julie: #189878; }
+.rc-plate-preview-cart.shell-julie.tint-clear,
+.rl-case.shell-julie.tint-clear { --julie: #6a90b0; }
+.rc-plate-preview-cart.shell-julie.tint-blue,
+.rl-case.shell-julie.tint-blue { --julie: #1858c8; }
+.rc-plate-preview-cart.shell-julie.tint-amber,
+.rl-case.shell-julie.tint-amber { --julie: #c87810; }
+.rc-plate-preview-cart.shell-julie.tint-smoke,
+.rl-case.shell-julie.tint-smoke { --julie: #4a5058; }
+
+/* ── top lip: gray metal edged bar (not flat black brick) ─── */
+.rc-prev-notch,
+.rl-case-notch {
+  position: absolute;
+  top: 0;
+  left: 16%;
+  right: 16%;
+  height: 0.3rem;
+  z-index: 1;
+  border-radius: 0 0 2px 2px;
+  pointer-events: none;
+  display: block;
+  background: linear-gradient(
+    180deg,
+    #8a909c 0%,
+    #5a606c 35%,
+    #2a2e36 70%,
+    #121418 100%
+  );
+  box-shadow:
+    inset 1px 0 0 rgba(255, 255, 255, 0.28),
+    inset -1px 0 0 rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* ── short plate badge (SKU fragment from ROM identity) ──── */
+.rc-prev-badge,
+.rl-case-badge {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.3rem;
+  z-index: 2;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.38rem;
+  letter-spacing: 0.05em;
+  padding: 0.06rem 0.18rem;
+  background: #0a0c10;
+  color: #eef;
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.14),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.6);
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── logo plate — % of cart so size can differ by room ───── */
+.rc-plate-preview-plate,
+.rl-case-label {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 14%;
+  height: 48%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28rem 0.22rem;
+  text-align: center;
+  font-family: "Special Elite", "Courier New", ui-monospace, monospace;
+  /* readable at Launcher pack density; still proportional */
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  color: #e8d8b0;
+  background: #0a1018;
+  border: none;
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 1px 1px 0 rgba(0, 0, 0, 0.7),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.08),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.3);
+  word-break: break-word;
+  overflow: hidden;
+}
+
+.rl-case-label-main {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 400;
+  letter-spacing: inherit;
+  color: inherit;
+  line-height: 1.15;
+  word-break: break-word;
+  max-width: 100%;
+  max-height: 3.6em;
+  overflow: hidden;
+}
+
+.rl-case-label.has-custom-plate {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 1px 1px 0 rgba(0, 0, 0, 0.65),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Cat mini shelf: slightly denser type, still legible */
+.rc-rom-face .rc-plate-preview-plate,
+.rc-rom-face-plate {
+  font-size: 0.55rem;
+  line-height: 1.15;
+}
+
+/* ── SKU ─────────────────────────────────────────────────── */
+.rc-prev-sku,
+.rl-case-sku {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 70%;
+  bottom: auto;
+  z-index: 4;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.36rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: rgba(220, 230, 240, 0.72);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.rc-rom-face .rc-prev-sku {
+  font-size: 0.3rem;
+}
+
+/* ── pins ────────────────────────────────────────────────── */
+.rc-prev-pins,
+.rl-case-pins {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 0;
+  height: 14%;
+  min-height: 0.55rem;
+  max-height: 1.05rem;
+  z-index: 3;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    #d8d0b0 0 2px,
+    #2a2820 2px 3.5px
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+/*
+ * classicboi — NES gray ABS · GB proportions · floppy slot.
+ * HD law: 0 blur. Integer px. Hard 1px rims (same nudge language as julie).
+ * Soft gradients and drop-shadow filters turn this into a gray pillow at shelf size.
+ */
+.rc-plate-preview-cart.shell-classicboi .rc-prev-shell,
+.rl-case.shell-classicboi .rl-case-shell {
+  background: linear-gradient(180deg, #9c9c94 0%, #7a7a72 55%, #686860 100%);
+  box-shadow:
+    2px 2px 0 rgba(22, 20, 16, 0.45),
+    inset 0 0 0 1px #2e2e2a,
+    inset 1px 1px 0 #d0d0c6,
+    inset -1px -1px 0 #3a3a34,
+    inset 2px 2px 0 rgba(255, 252, 245, 0.18),
+    inset -2px -2px 0 rgba(16, 14, 12, 0.28);
+}
+
+.rc-plate-preview-cart.shell-classicboi .rc-prev-shell::before,
+.rl-case.shell-classicboi .rl-case-shell::before {
+  content: none;
+}
+
+/* molded grip lip — one step out of the face, hard grooves, hard undercut */
+.rc-plate-preview-cart.shell-classicboi .rc-prev-notch,
+.rl-case.shell-classicboi .rl-case-notch {
+  top: 1.5%;
+  left: 6%;
+  right: 6%;
+  height: 11%;
+  z-index: 3;
+  border-radius: 1px 6px 2px 2px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 3px,
+      #3a3a34 3px 4px,
+      #c8c8be 4px 5px,
+      transparent 5px 8px
+    ),
+    linear-gradient(180deg, #c4c4ba 0%, #8e8e86 100%);
+  box-shadow:
+    inset 1px 0 0 #d8d8ce,
+    inset -1px 0 0 #3a3a34,
+    inset 0 1px 0 #ecece4,
+    inset 0 -1px 0 #2a2a26,
+    0 1px 0 #1a1a16;
+}
+
+.rc-plate-preview-cart.shell-classicboi .rc-prev-notch::after,
+.rl-case.shell-classicboi .rl-case-notch::after {
+  content: none;
+}
+
+/* recessed label tray — hard well, not a soft hole */
+.rc-plate-preview-cart.shell-classicboi .rc-prev-well,
+.rl-case.shell-classicboi .rl-case-well {
+  display: block;
+  left: 6%;
+  right: 6%;
+  top: 14%;
+  height: 49%;
+  z-index: 1;
+  border-radius: 1px;
+  background: #4a4a44;
+  box-shadow:
+    inset 1px 1px 0 #242420,
+    inset -1px -1px 0 #8a8a82;
+}
+
+/* stamped code on the lip, not a black chip */
+.rc-plate-preview-cart.shell-classicboi .rc-prev-badge,
+.rl-case.shell-classicboi .rl-case-badge {
+  top: 3.2%;
+  left: 8%;
+  z-index: 4;
+  padding: 0.04rem 0.14rem;
+  font-size: 0.32rem;
+  letter-spacing: 0.06em;
+  background: #3a3a34;
+  color: #e8e4d8;
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px 0 #1a1a16,
+    inset -1px -1px 0 #8a8a82;
+}
+
+/* factory disk label — dark printed sticker, quiet mono, not cream paper */
+.rc-plate-preview-cart.shell-classicboi .rc-plate-preview-plate,
+.rl-case.shell-classicboi .rl-case-label {
+  top: 16%;
+  height: 45%;
+  left: 8.5%;
+  right: 8.5%;
+  z-index: 2;
+  border-radius: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.48rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  background: #1a1a18;
+  color: #d0cec6;
+  box-shadow:
+    0 0 0 1px #0a0a08,
+    inset 1px 1px 0 #2e2e2a,
+    inset -1px -1px 0 #000;
+}
+
+.rc-plate-preview-cart.shell-classicboi .rc-plate-preview-plate.has-custom-plate,
+.rl-case.shell-classicboi .rl-case-label.has-custom-plate {
+  background: #16140f;
+  color: #e8d8b0;
+  box-shadow:
+    0 0 0 1px #0a0908,
+    inset 1px 1px 0 rgba(255, 255, 255, 0.1),
+    inset -1px -1px 0 #000;
+}
+
+.rc-plate-preview-cart.shell-classicboi .rc-prev-sku,
+.rl-case.shell-classicboi .rl-case-sku {
+  top: 64%;
+  z-index: 4;
+  color: #2a2824;
+  text-shadow: 0 1px 0 #c8c8be;
+}
+
+/*
+ * Contact bay — black slot + chrome lip + gold teeth.
+ * A gray metal slab was disappearing into the body at shelf size.
+ * Behind the pins is a dark cavity so the teeth stay teeth.
+ */
+.rc-plate-preview-cart.shell-classicboi .rc-prev-shutter,
+.rl-case.shell-classicboi .rl-case-shutter {
+  display: block;
+  left: 8%;
+  right: 8%;
+  bottom: 0;
+  height: 16%;
+  z-index: 3;
+  border-radius: 0;
+  background: #0c0b09;
+  box-shadow:
+    0 -1px 0 #f0f2f6,
+    0 -2px 0 #8a9098,
+    inset 1px 0 0 #3a3c40,
+    inset -1px 0 0 #3a3c40,
+    inset 0 1px 0 #000,
+    inset 0 -1px 0 #c8ccd0;
+}
+
+.rc-plate-preview-cart.shell-classicboi .rc-prev-shutter::before,
+.rl-case.shell-classicboi .rl-case-shutter::before,
+.rc-plate-preview-cart.shell-classicboi .rc-prev-shutter::after,
+.rl-case.shell-classicboi .rl-case-shutter::after {
+  content: none;
+  display: none;
+}
+
+.rc-plate-preview-cart.shell-classicboi .rc-prev-pins,
+.rl-case.shell-classicboi .rl-case-pins {
+  left: 12%;
+  right: 12%;
+  bottom: 2px;
+  height: 12%;
+  min-height: 0.5rem;
+  max-height: none;
+  z-index: 4;
+  opacity: 1;
+  border-radius: 0;
+  background-color: #0c0b09;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #fff3c4 0px,
+    #fff3c4 1px,
+    #d4a84a 1px,
+    #d4a84a 2px,
+    #0c0b09 2px,
+    #0c0b09 3px
+  );
+  box-shadow:
+    inset 0 1px 0 #fff6d0,
+    inset 0 -1px 0 #5a3a10;
+}
+
+.rl-case.shell-classicboi .rl-case-status {
+  top: 3.2%;
+  right: 0.32rem;
+  z-index: 4;
+}
+
+.rl-case-status {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.28rem;
+  z-index: 2;
+  font-size: 0.34rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #c8a060;
+  pointer-events: none;
+}
+.rl-case.is-broken .rl-case-status {
+  color: #e07070;
+}
+.rl-case.shell-classicboi.is-warm .rl-case-shell {
+  box-shadow:
+    2px 2px 0 rgba(22, 20, 16, 0.45),
+    inset 0 0 0 1px #2e2e2a,
+    inset 1px 1px 0 #d0d0c6,
+    inset -1px -1px 0 #3a3a34,
+    inset 2px 2px 0 rgba(255, 252, 245, 0.18),
+    inset -2px -2px 0 rgba(16, 14, 12, 0.28),
+    0 0 0 1px rgba(60, 200, 120, 0.5);
+}
+
+/*
+ * julie — SAME cartridge as classicboi (lip · well · shutter · integer pins).
+ * HD law: 0 blur. Integer px. Hard 1px rims. No melted G3 silhouette.
+ * Paint is candy ABS: milky top, saturated mass, chromatic edge — not poster paint.
+ */
+.rc-plate-preview-cart.shell-julie .rc-prev-shell,
+.rl-case.shell-julie .rl-case-shell {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--julie, #c01830) 38%, #ffffff) 0%,
+    color-mix(in srgb, var(--julie, #c01830) 72%, #ffffff) 26%,
+    var(--julie, #c01830) 58%,
+    color-mix(in srgb, var(--julie, #c01830) 80%, #1a1a20) 100%
+  );
+  box-shadow:
+    2px 2px 0 color-mix(in srgb, var(--julie, #c01830) 50%, #161410),
+    inset 0 0 0 1px color-mix(in srgb, var(--julie, #c01830) 42%, #1a1216),
+    inset 1px 1px 0 color-mix(in srgb, var(--julie, #c01830) 16%, #ffffff),
+    inset -1px -1px 0 color-mix(in srgb, var(--julie, #c01830) 48%, #1c1014),
+    inset 2px 2px 0 color-mix(in srgb, var(--julie, #c01830) 20%, #ffffff),
+    inset -2px -2px 0 color-mix(in srgb, var(--julie, #c01830) 58%, #141018);
+}
+
+.rc-plate-preview-cart.shell-julie .rc-prev-shell::before,
+.rl-case.shell-julie .rl-case-shell::before,
+.rc-plate-preview-cart.shell-julie .rc-prev-shell::after,
+.rl-case.shell-julie .rl-case-shell::after {
+  content: none;
+  display: none;
+}
+
+/* molded grip lip — same step as classicboi, grooved candy instead of NES gray */
+.rc-plate-preview-cart.shell-julie .rc-prev-notch,
+.rl-case.shell-julie .rl-case-notch {
+  top: 1.5%;
+  left: 6%;
+  right: 6%;
+  height: 11%;
+  z-index: 3;
+  border-radius: 1px 6px 2px 2px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 3px,
+      color-mix(in srgb, var(--julie, #c01830) 48%, #1a1216) 3px 4px,
+      color-mix(in srgb, var(--julie, #c01830) 18%, #ffffff) 4px 5px,
+      transparent 5px 8px
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--julie, #c01830) 28%, #ffffff) 0%,
+      color-mix(in srgb, var(--julie, #c01830) 66%, #ffffff) 100%
+    );
+  box-shadow:
+    inset 1px 0 0 color-mix(in srgb, var(--julie, #c01830) 14%, #ffffff),
+    inset -1px 0 0 color-mix(in srgb, var(--julie, #c01830) 46%, #1a1216),
+    inset 0 1px 0 color-mix(in srgb, var(--julie, #c01830) 10%, #ffffff),
+    inset 0 -1px 0 color-mix(in srgb, var(--julie, #c01830) 52%, #141014),
+    0 1px 0 color-mix(in srgb, var(--julie, #c01830) 55%, #1a1014);
+}
+
+.rc-plate-preview-cart.shell-julie .rc-prev-notch::after,
+.rl-case.shell-julie .rl-case-notch::after {
+  content: none;
+}
+
+/* recessed label tray — darker candy, hard well */
+.rc-plate-preview-cart.shell-julie .rc-prev-well,
+.rl-case.shell-julie .rl-case-well {
+  display: block;
+  left: 6%;
+  right: 6%;
+  top: 14%;
+  height: 49%;
+  z-index: 1;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--julie, #c01830) 68%, #2a2228);
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--julie, #c01830) 50%, #141018),
+    inset -1px -1px 0 color-mix(in srgb, var(--julie, #c01830) 28%, #ffffff);
+}
+
+/* stamped code on the lip */
+.rc-plate-preview-cart.shell-julie .rc-prev-badge,
+.rl-case.shell-julie .rl-case-badge {
+  top: 3.2%;
+  left: 8%;
+  z-index: 4;
+  padding: 0.04rem 0.14rem;
+  font-size: 0.32rem;
+  letter-spacing: 0.06em;
+  background: color-mix(in srgb, var(--julie, #c01830) 62%, #1a1216);
+  color: color-mix(in srgb, var(--julie, #c01830) 12%, #ffffff);
+  border-radius: 0;
+  box-shadow:
+    inset 1px 1px 0 color-mix(in srgb, var(--julie, #c01830) 55%, #0e0a0c),
+    inset -1px -1px 0 color-mix(in srgb, var(--julie, #c01830) 26%, #ffffff);
+}
+
+/* factory disk label — same dark sticker as classicboi, thin candy ring */
+.rc-plate-preview-cart.shell-julie .rc-plate-preview-plate,
+.rl-case.shell-julie .rl-case-label {
+  top: 16%;
+  height: 45%;
+  left: 8.5%;
+  right: 8.5%;
+  z-index: 2;
+  border-radius: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.48rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  background: #1a1a18;
+  color: #d0cec6;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--julie, #c01830) 40%, #0a0a08),
+    inset 1px 1px 0 #2e2e2a,
+    inset -1px -1px 0 #000;
+}
+
+.rc-plate-preview-cart.shell-julie .rc-plate-preview-plate.has-custom-plate,
+.rl-case.shell-julie .rl-case-label.has-custom-plate {
+  background: #16140f;
+  color: #e8d8b0;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--julie, #c01830) 35%, #0a0908),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.1),
+    inset -1px -1px 0 #000;
+}
+
+.rc-plate-preview-cart.shell-julie .rc-prev-sku,
+.rl-case.shell-julie .rl-case-sku {
+  top: 64%;
+  z-index: 4;
+  color: color-mix(in srgb, var(--julie, #c01830) 40%, #0a0a0c);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--julie, #c01830) 18%, #ffffff);
+}
+
+/* Contact bay — same black slot + chrome lip + gold teeth as classicboi */
+.rc-plate-preview-cart.shell-julie .rc-prev-shutter,
+.rl-case.shell-julie .rl-case-shutter {
+  display: block;
+  left: 8%;
+  right: 8%;
+  bottom: 0;
+  height: 16%;
+  z-index: 3;
+  border-radius: 0;
+  background: #0c0b09;
+  box-shadow:
+    0 -1px 0 #f0f2f6,
+    0 -2px 0 #8a9098,
+    inset 1px 0 0 #3a3c40,
+    inset -1px 0 0 #3a3c40,
+    inset 0 1px 0 #000,
+    inset 0 -1px 0 #c8ccd0;
+}
+
+.rc-plate-preview-cart.shell-julie .rc-prev-shutter::before,
+.rl-case.shell-julie .rl-case-shutter::before,
+.rc-plate-preview-cart.shell-julie .rc-prev-shutter::after,
+.rl-case.shell-julie .rl-case-shutter::after {
+  content: none;
+  display: none;
+}
+
+.rc-plate-preview-cart.shell-julie .rc-prev-pins,
+.rl-case.shell-julie .rl-case-pins {
+  left: 12%;
+  right: 12%;
+  bottom: 2px;
+  height: 12%;
+  min-height: 0.5rem;
+  max-height: none;
+  z-index: 4;
+  opacity: 1;
+  border-radius: 0;
+  background-color: #0c0b09;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #fff3c4 0px,
+    #fff3c4 1px,
+    #d4a84a 1px,
+    #d4a84a 2px,
+    #0c0b09 2px,
+    #0c0b09 3px
+  );
+  box-shadow:
+    inset 0 1px 0 #fff6d0,
+    inset 0 -1px 0 #5a3a10;
+}
+
+.rl-case.shell-julie .rl-case-status {
+  top: 3.2%;
+  right: 0.32rem;
+  z-index: 4;
+}
+
+.rl-case.shell-julie.is-warm .rl-case-shell {
+  box-shadow:
+    2px 2px 0 color-mix(in srgb, var(--julie, #c01830) 50%, #161410),
+    inset 0 0 0 1px color-mix(in srgb, var(--julie, #c01830) 42%, #1a1216),
+    inset 1px 1px 0 color-mix(in srgb, var(--julie, #c01830) 16%, #ffffff),
+    inset -1px -1px 0 color-mix(in srgb, var(--julie, #c01830) 48%, #1c1014),
+    inset 2px 2px 0 color-mix(in srgb, var(--julie, #c01830) 20%, #ffffff),
+    inset -2px -2px 0 color-mix(in srgb, var(--julie, #c01830) 58%, #141018),
+    0 0 0 1px rgba(60, 200, 120, 0.5);
+}
+
+.rl-case.is-warm .rl-case-pins {
+  background-color: #0a1810;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #e8ffe8 0px,
+    #e8ffe8 1px,
+    #6ad08a 1px,
+    #6ad08a 2px,
+    #0a1810 2px,
+    #0a1810 3px
+  );
+  box-shadow:
+    inset 0 1px 0 #f0fff4,
+    inset 0 -1px 0 #1a3828;
+  opacity: 1;
+}

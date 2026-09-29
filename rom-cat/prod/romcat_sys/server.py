@@ -160,9 +160,11 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             if not rid:
                 rid = slug_id(name)
-            status = (payload.get("status") or "idea").strip().lower()
-            if status not in ("idea", "desk", "shipped", "mausoleum", "broken"):
-                status = "idea"
+            status = (payload.get("status") or "").strip().lower()
+            if status not in ("idea", "desk", "live", "shipped", "mausoleum", "broken", "archive"):
+                # blank / unknown from the form: keep the status already on file (new ROM -> idea)
+                _prev = next((r for r in roms if r.get("id") == rid), None)
+                status = str((_prev or {}).get("status") or "idea")
             launcher_show = payload.get("launcher_show")
             if isinstance(launcher_show, str):
                 launcher_show = launcher_show.lower() in ("1", "true", "yes", "on")

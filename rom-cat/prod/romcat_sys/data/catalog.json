@@ -8,9 +8,9 @@
     {
       "id": "dcc",
       "name": "Dewey Catalog Co.",
-      "chip_code": "CO.DCC",
+      "chip_code": "DEWEY",
       "mission": "First there was DEWEY'S DECIMALS. Now, there is whole catalogs of cards made of the same hope! Dewey Catalogs what you want to keep -- but not the DATA. That's DatBOX's thing.",
-      "hands_ven": "DCO",
+      "hands_ven": "DOLORES DEWEY",
       "notes": "First ROM sets the house look. Keep the sticky cabinet (cat-o-roms) as a separate cute accident — not this catalog.",
       "address": "ALICE_BOX/dewey-catalog-co/"
     },
@@ -123,7 +123,7 @@
       "description": "Catalog of ROM producers and their SKUs. SKU is a ROM chip code. Lists itself.",
       "status": "live",
       "address": "ALICE_BOX/dewey-catalog-co/rom-cat/",
-      "notes": "Built from DCO REQ rev 7. plate_css customizes launcher logo sticker.",
+      "notes": "Built from DCO REQ rev 7.",
       "launcher_show": true,
       "plate_css": "background: repeating-linear-gradient(\n    to bottom,\n    blue 0px,\n    darkblue 2px,\n    blue 3px,\n    darkblue 4px\n  );\nbox-shadow: inset 0 0 6px #00000033;\nfont-size: 0.7rem;\nborder: 1px solid blue;\nbox-shadow: 1px 1px 0 #ffffff33, -1px -1px #333;",
       "case_shell": "classicboi",
