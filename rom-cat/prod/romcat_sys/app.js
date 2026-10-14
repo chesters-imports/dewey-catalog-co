@@ -8,6 +8,8 @@
   const producerShelf = document.getElementById("producerShelf");
   const producerCard = document.getElementById("producerCard");
   const romBins = document.getElementById("romBins");
+  const viewRom = document.getElementById("viewRom");
+  const romPage = document.getElementById("romPage");
 
   const dlgP = document.getElementById("dlgProducer");
   const dlgR = document.getElementById("dlgRom");
@@ -16,6 +18,8 @@
 
   let data = null;
   let openProducerId = null;
+  let openRomId = null;
+  let returnToRomAfterEdit = null;
   const NAV_LS = "romcat.nav.v1";
 
   function esc(s) {
@@ -129,6 +133,8 @@
     writeNav("");
     viewProducers.hidden = false;
     viewProducer.hidden = true;
+    if (viewRom) viewRom.hidden = true;
+    openRomId = null;
     const list = data.producers || [];
     if (!list.length) {
       producerShelf.innerHTML =
@@ -168,27 +174,13 @@
     writeNav(pid);
     viewProducers.hidden = true;
     viewProducer.hidden = false;
+    if (viewRom) viewRom.hidden = true;
+    openRomId = null;
 
     // Compact bay strip — room for ROM cart faces, not a huge empty card
-    producerCard.className = "rc-bay-strip";
-    const oneLiner = [
-      p.mission ? p.mission.slice(0, 100) + (p.mission.length > 100 ? "…" : "") : "",
-      p.hands_ven ? "VEN " + p.hands_ven : "",
-      p.address || "",
-    ]
-      .filter(Boolean)
-      .join(" · ");
-    producerCard.innerHTML =
-      `<div class="rc-bay-strip-row">` +
-      `<button type="button" class="rc-back rc-back-inline" id="btnBackInner">← producers</button>` +
-      `<div class="rc-bay-id">` +
-      `<span class="rc-index-name">${esc(p.name)}</span>` +
-      `<span class="rc-index-chip">${esc(p.chip_code || "—")}</span>` +
-      `</div>` +
-      `<button type="button" class="rc-btn rc-btn-compact" id="btnEditProducer">edit</button>` +
-      `</div>` +
-      `<p class="rc-bay-oneliner">${esc(oneLiner || "no mission / address on file")}</p>`;
-
+    producerCard.className = "rc-bay-strip rc-pp-head";
+    viewProducer.style.setProperty("--hue", producerHue(pid));
+    producerCard.innerHTML = producerHeaderHtml(p, romsFor(pid).length);
     document.getElementById("btnEditProducer").onclick = () => openProducerForm(p);
     document.getElementById("btnBackInner").onclick = () => showProducers();
 
@@ -213,13 +205,14 @@
         const onShelf = r.launcher_show !== false;
         return (
           `<li class="rc-rom-slot">` +
-          `<button type="button" class="rc-rom-product" data-edit-rom="${esc(r.id)}" title="${esc(
+          `<button type="button" class="rc-rom-product" data-view-rom="${esc(r.id)}" title="${esc(
             r.name || "ROM"
           )}">` +
           `<span class="rc-rom-peg" aria-hidden="true"></span>` +
           `<span class="${shellCls}" ${hex ? `style="--julie:${esc(tint)}"` : ""}>` +
           `<span class="rc-prev-shell"></span>` +
           `<span class="rc-prev-notch" aria-hidden="true"></span>` +
+          `<span class="rc-prev-well" aria-hidden="true"></span>` +
           `<span class="rc-prev-badge">${esc(shortPlate(r.chip_code, r.name))}</span>` +
           `<span class="rc-plate-preview-plate rc-rom-face-plate" data-rom-plate="${esc(
             r.id
@@ -227,6 +220,7 @@
           `<span class="rc-prev-sku">${esc(
             (r.chip_code || "CO.SKU").slice(0, 20)
           )}</span>` +
+          `<span class="rc-prev-shutter" aria-hidden="true"></span>` +
           `<span class="rc-prev-pins" aria-hidden="true"></span>` +
           `</span>` +
           `<span class="rc-rom-product-foot">` +
@@ -256,6 +250,7 @@
       plate.textContent = r.name || "ROM";
       const raw = (r.plate_css || "").trim();
       if (raw) plate.setAttribute("style", raw);
+      plate.classList.toggle("has-custom-plate", !!raw);
     });
 
     romBins.querySelectorAll("[data-edit-rom]").forEach((btn) => {
@@ -265,6 +260,9 @@
         );
         if (r) openRomForm(r);
       });
+    });
+    romBins.querySelectorAll("[data-view-rom]").forEach((btn) => {
+      btn.addEventListener("click", () => showRom(btn.getAttribute("data-view-rom")));
     });
     romBins.querySelectorAll("[data-toggle-launch]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -296,6 +294,326 @@
     });
   }
 
+  /* ── ROM page + producer header (viewing layer) ───────────
+     A ROM opens as a readable page. Edit is a secondary action that
+     opens the SAME editor dialog (openRomForm) — customization untouched. */
+  const ROM_LABELS = {
+    name: "ROM name",
+    description: "Description",
+    producer_id: "Producer",
+    chip_code: "ROM chip code (SKU)",
+    status: "Release status",
+    address: "Address in ALICE_BOX",
+    launcher_show: "Show on ROM Launcher",
+    case_shell: "Case shell",
+    julie_tint: "Julie tint",
+    plate_css: "Logo plate CSS",
+    notes: "Free notes",
+    id: "Catalog ID",
+  };
+  const ROM_SECTIONS = [
+    { title: "About", keys: ["description", "notes"], wide: true },
+    { title: "Catalog card", keys: ["producer_id", "chip_code", "status", "address", "launcher_show", "id"] },
+    { title: "Case & plate", keys: ["case_shell", "julie_tint", "plate_css"] },
+  ];
+  const ROM_KNOWN = ["name"].concat(...ROM_SECTIONS.map((s) => s.keys));
+  const PRODUCER_LABELS = {
+    name: "Company name",
+    chip_code: "Company chip code",
+    mission: "Mission statement",
+    hands_ven: "Current hands operator (VEN)",
+    address: "Address in ALICE_BOX",
+    notes: "Free notes",
+    id: "Catalog ID",
+  };
+  const PRODUCER_KNOWN = ["id", "name", "chip_code", "mission", "hands_ven", "address", "notes"];
+  // display-only copy of the swatch colours used by the editor buttons
+  const TINT_SWATCH = {
+    red: "#c01830",
+    crimson: "#7a0018",
+    pink: "#d02878",
+    purple: "#5a18b8",
+    blue: "#1858c8",
+    mint: "#189878",
+    amber: "#c87810",
+    clear: "#6a90b0",
+    smoke: "#4a5058",
+  };
+  // same five tab colours as the producer tiles on the first page
+  const HUES = ["#5c6ee8", "#e85a9a", "#3cb89a", "#e8a040", "#8a62d8"];
+
+  function producerHue(pid) {
+    const i = (data.producers || []).findIndex((p) => p.id === pid);
+    return HUES[(i < 0 ? 0 : i) % HUES.length];
+  }
+
+  function romById(rid) {
+    return (data.roms || []).find((r) => r.id === rid) || null;
+  }
+
+  function readNavRomId() {
+    try {
+      const h = (window.location.hash || "").replace(/^#/, "");
+      if (h.startsWith("r=")) return decodeURIComponent(h.slice(2)).trim();
+    } catch (e) {
+      /* */
+    }
+    return "";
+  }
+
+  function humanKey(k) {
+    const s = String(k)
+      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+      .replace(/[_\-.]+/g, " ")
+      .trim();
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : String(k);
+  }
+
+  function emptyVal(txt) {
+    return `<span class="rc-empty-val">${esc(txt || "nothing filed")}</span>`;
+  }
+
+  function monoOr(v, empty) {
+    return String(v ?? "").trim() ? `<span class="rc-mono">${esc(v)}</span>` : emptyVal(empty || "blank");
+  }
+
+  /** Any stored value → readable HTML (prose keeps line breaks, lists as lists). */
+  function valueHtml(v) {
+    if (v === null || v === undefined) return emptyVal("nothing filed");
+    if (typeof v === "boolean") return v ? "Yes" : "No";
+    if (typeof v === "number") return esc(String(v));
+    if (Array.isArray(v)) {
+      if (!v.length) return emptyVal("empty list");
+      return `<ul class="rc-list">${v.map((x) => `<li>${valueHtml(x)}</li>`).join("")}</ul>`;
+    }
+    if (typeof v === "object") {
+      const keys = Object.keys(v);
+      if (!keys.length) return emptyVal("empty");
+      return listHtml(v, keys, {}, null, true);
+    }
+    const s = String(v);
+    if (!s.trim()) return emptyVal("blank");
+    return `<div class="rc-prose">${esc(s)}</div>`;
+  }
+
+  /** Label / value rows for the given keys (missing keys say "not set"). */
+  function listHtml(obj, keys, labels, special, nested) {
+    const has = (k) => Object.prototype.hasOwnProperty.call(obj, k);
+    return (
+      `<dl class="rc-fields${nested ? " rc-fields-nested" : ""}">` +
+      keys
+        .map((k) => {
+          const custom = special ? special(k, obj[k], has(k)) : null;
+          const body = custom != null ? custom : has(k) ? valueHtml(obj[k]) : emptyVal("not set");
+          return (
+            `<div class="rc-field"><dt>${esc(labels[k] || humanKey(k))}</dt>` +
+            `<dd data-field="${esc(k)}">${body}</dd></div>`
+          );
+        })
+        .join("") +
+      `</dl>`
+    );
+  }
+
+  /** Producer page header: breadcrumbs + readable card with every producer field. */
+  function producerHeaderHtml(p, nRoms) {
+    const extras = Object.keys(p).filter((k) => !PRODUCER_KNOWN.includes(k));
+    const fact = (label, html) => `<div class="rc-fact"><dt>${esc(label)}</dt><dd>${html}</dd></div>`;
+    return (
+      `<nav class="rc-crumbs" aria-label="Breadcrumb">` +
+      `<button type="button" class="rc-crumb" id="btnBackInner">Producers</button>` +
+      `<span class="rc-crumb-sep" aria-hidden="true">›</span>` +
+      `<span class="rc-crumb-here" aria-current="page">${esc(p.name || p.id)}</span>` +
+      `</nav>` +
+      `<div class="rc-pp-card">` +
+      `<div class="rc-pp-top">` +
+      `<div class="rc-pp-titles">` +
+      `<p class="rc-kick">Producer${
+        String(p.chip_code || "").trim() ? ` · <span class="rc-kick-chip">${esc(p.chip_code)}</span>` : ""
+      }</p>` +
+      `<h1 class="rc-pp-name">${esc(p.name || p.id)}</h1>` +
+      `</div>` +
+      `<button type="button" class="rc-btn" id="btnEditProducer">Edit producer</button>` +
+      `</div>` +
+      (String(p.mission || "").trim()
+        ? `<p class="rc-pp-mission rc-prose">${esc(p.mission)}</p>`
+        : `<p class="rc-pp-mission">${emptyVal("no mission statement filed")}</p>`) +
+      `<dl class="rc-facts">` +
+      fact(PRODUCER_LABELS.chip_code, monoOr(p.chip_code)) +
+      fact(PRODUCER_LABELS.hands_ven, monoOr(p.hands_ven)) +
+      fact(PRODUCER_LABELS.address, monoOr(p.address)) +
+      fact("ROMs on file", `<span class="rc-mono">${nRoms}</span>`) +
+      fact(PRODUCER_LABELS.id, monoOr(p.id)) +
+      `</dl>` +
+      `<div class="rc-pp-notes"><h3 class="rc-sub-h">${esc(PRODUCER_LABELS.notes)}</h3>${
+        Object.prototype.hasOwnProperty.call(p, "notes") ? valueHtml(p.notes) : emptyVal("not set")
+      }</div>` +
+      (extras.length
+        ? `<div class="rc-pp-extra"><h3 class="rc-sub-h">Other fields</h3>${listHtml(p, extras, {}, null)}</div>`
+        : "") +
+      `</div>`
+    );
+  }
+
+  /** Same case markup the shelf cards use (shell / tint / plate_css). */
+  function romFaceHtml(r) {
+    const shell = r.case_shell === "julie" ? "julie" : "classicboi";
+    const tint = String(r.julie_tint || "red").trim();
+    const hex = isJulieHex(tint);
+    const cls =
+      "rc-plate-preview-cart rc-rom-face shell-" +
+      shell +
+      (shell === "julie" ? (hex ? " tint-custom" : " tint-" + tint.replace(/[^a-z0-9_-]/gi, "")) : "");
+    return (
+      `<span class="${cls}" ${hex ? `style="--julie:${esc(tint)}"` : ""}>` +
+      `<span class="rc-prev-shell"></span>` +
+      `<span class="rc-prev-notch" aria-hidden="true"></span>` +
+      `<span class="rc-prev-well" aria-hidden="true"></span>` +
+      `<span class="rc-prev-badge">${esc(shortPlate(r.chip_code, r.name))}</span>` +
+      `<span class="rc-plate-preview-plate rc-rom-face-plate" data-rp-plate></span>` +
+      `<span class="rc-prev-sku">${esc((r.chip_code || "CO.SKU").slice(0, 20))}</span>` +
+      `<span class="rc-prev-shutter" aria-hidden="true"></span>` +
+      `<span class="rc-prev-pins" aria-hidden="true"></span>` +
+      `</span>`
+    );
+  }
+
+  function showRom(rid) {
+    const r = romById(rid);
+    if (!r || !viewRom || !romPage) return;
+    const p = producerById(r.producer_id);
+    openProducerId = r.producer_id || null;
+    openRomId = r.id;
+    writeNav(r.producer_id || "");
+    try {
+      const u = new URL(window.location.href);
+      history.replaceState(null, "", u.pathname + u.search + "#r=" + encodeURIComponent(r.id));
+    } catch (e) {
+      /* */
+    }
+    viewProducers.hidden = true;
+    viewProducer.hidden = true;
+    viewRom.hidden = false;
+    viewRom.style.setProperty("--hue", producerHue(r.producer_id));
+
+    const shell = r.case_shell === "julie" ? "julie" : "classicboi";
+    const tint = String(r.julie_tint || "red").trim();
+    const onShelf = r.launcher_show !== false;
+    const backBtn = p
+      ? `<button type="button" class="rc-btn" data-go-producer="${esc(p.id)}">← Back to ${esc(p.name)}</button>`
+      : `<button type="button" class="rc-btn" data-crumb-home>← Producers</button>`;
+
+    const special = (k, v, has) => {
+      if (k === "producer_id") {
+        if (!has || !String(v ?? "").trim()) return emptyVal("no producer set");
+        return p
+          ? `<button type="button" class="rc-crumb" data-go-producer="${esc(p.id)}">${esc(p.name)}</button>` +
+              ` <span class="rc-mono rc-note">${esc(v)}</span>`
+          : `<span class="rc-mono">${esc(v)}</span> <span class="rc-note">(no producer on file with this id)</span>`;
+      }
+      if (!has) {
+        if (k === "case_shell") return emptyVal("not set · shows as classicboi");
+        if (k === "julie_tint") return emptyVal("not set · julie shells default to red");
+        if (k === "plate_css") return emptyVal("not set · classic plate");
+        return null;
+      }
+      if ((k === "chip_code" || k === "address" || k === "id") && String(v ?? "").trim()) {
+        return `<span class="rc-mono">${esc(v)}</span>`;
+      }
+      if (k === "status" && String(v ?? "").trim()) {
+        return `<span class="rc-status" data-s="${esc(v)}">${esc(v)}</span>`;
+      }
+      if (k === "launcher_show" && typeof v === "boolean") {
+        return v ? "Yes · on the ROM Launcher start menu" : "No · kept in the stockroom";
+      }
+      if (k === "case_shell" && String(v ?? "").trim()) {
+        return `<span class="rc-mono">${esc(v)}</span>`;
+      }
+      if (k === "julie_tint" && String(v ?? "").trim()) {
+        const t = String(v).trim();
+        const sw = TINT_SWATCH[t.toLowerCase()] || (isJulieHex(t) ? t : "");
+        return (
+          (sw ? `<span class="rc-swatch" style="--sw:${esc(sw)}"></span>` : "") +
+          `<span class="rc-mono">${esc(t)}</span>` +
+          (shell !== "julie" ? ` <span class="rc-note">· only used by the julie shell</span>` : "")
+        );
+      }
+      if (k === "plate_css" && String(v ?? "").trim()) {
+        return `<pre class="rc-code">${esc(v)}</pre>`;
+      }
+      return null;
+    };
+
+    const extras = Object.keys(r).filter((k) => !ROM_KNOWN.includes(k));
+    const sections = ROM_SECTIONS.concat(extras.length ? [{ title: "Other fields", keys: extras, wide: true }] : []);
+
+    romPage.innerHTML =
+      `<nav class="rc-crumbs" aria-label="Breadcrumb">` +
+      `<button type="button" class="rc-crumb" data-crumb-home>Producers</button>` +
+      `<span class="rc-crumb-sep" aria-hidden="true">›</span>` +
+      (p
+        ? `<button type="button" class="rc-crumb" data-go-producer="${esc(p.id)}">${esc(p.name)}</button>`
+        : `<span class="rc-crumb-here">${esc(r.producer_id || "no producer")}</span>`) +
+      `<span class="rc-crumb-sep" aria-hidden="true">›</span>` +
+      `<span class="rc-crumb-here" aria-current="page">${esc(r.name || "unnamed ROM")}</span>` +
+      `</nav>` +
+      `<header class="rc-rp-head">` +
+      `<div class="rc-rp-face">${romFaceHtml(r)}</div>` +
+      `<div class="rc-rp-title">` +
+      `<p class="rc-kick">ROM${p ? ` · <span class="rc-kick-chip">${esc(p.name)}</span>` : ""}</p>` +
+      `<h1 class="rc-rp-name">${esc(r.name || "unnamed ROM")}</h1>` +
+      `<div class="rc-rp-tags">` +
+      `<span class="rc-status" data-s="${esc(r.status || "idea")}">${esc(r.status || "idea")}</span>` +
+      (r.chip_code ? `<span class="rc-rp-sku">${esc(r.chip_code)}</span>` : "") +
+      `<span class="rc-rp-tag">${esc(shell)}${shell === "julie" ? " · " + esc(tint) : ""}</span>` +
+      `<span class="rc-rp-tag${onShelf ? " is-on" : ""}">${onShelf ? "on launcher" : "stockroom"}</span>` +
+      `</div>` +
+      `<div class="rc-rp-actions">` +
+      `<button type="button" class="rc-btn rc-btn-primary" data-rp-edit>Edit ROM</button>` +
+      backBtn +
+      `</div>` +
+      `</div>` +
+      `</header>` +
+      `<div class="rc-rp-sections">` +
+      sections
+        .map(
+          (s) =>
+            `<section class="rc-rp-sec${s.wide ? " rc-rp-sec-wide" : ""}" aria-label="${esc(s.title)}">` +
+            `<h2 class="rc-rp-sec-h">${esc(s.title)}</h2>` +
+            listHtml(r, s.keys, ROM_LABELS, special) +
+            `</section>`
+        )
+        .join("") +
+      `</div>`;
+
+    // plate CSS + name after paint (same as shelf cards)
+    const plate = romPage.querySelector("[data-rp-plate]");
+    if (plate) {
+      plate.textContent = r.name || "ROM";
+      const raw = (r.plate_css || "").trim();
+      if (raw) plate.setAttribute("style", raw);
+      plate.classList.toggle("has-custom-plate", !!raw);
+    }
+
+    romPage.querySelectorAll("[data-crumb-home]").forEach((b) => {
+      b.addEventListener("click", () => showProducers());
+    });
+    romPage.querySelectorAll("[data-go-producer]").forEach((b) => {
+      b.addEventListener("click", () => openProducer(b.getAttribute("data-go-producer")));
+    });
+    const editBtn = romPage.querySelector("[data-rp-edit]");
+    if (editBtn) {
+      editBtn.addEventListener("click", () => {
+        const cur = romById(r.id);
+        if (!cur) return;
+        returnToRomAfterEdit = cur.id;
+        openRomForm(cur);
+      });
+    }
+    const main = document.querySelector(".rc-main");
+    if (main) main.scrollTop = 0;
+  }
+
   function openProducerForm(p) {
     document.getElementById("dlgProducerTitle").textContent = p
       ? "Edit producer"
@@ -309,7 +627,7 @@
     document.getElementById("p_notes").value = p ? p.notes || "" : "";
     document.getElementById("p_delete").hidden = !p;
     document.getElementById("p_err").hidden = true;
-    dlgP.showModal();
+    showEditor(dlgP);
   }
 
   function getCaseShell() {
@@ -405,9 +723,11 @@
       );
     }
     plate.removeAttribute("style");
+    plate.classList.remove("has-custom-plate");
     const raw = (cssEl && cssEl.value || "").trim();
     if (raw) {
       plate.setAttribute("style", raw);
+      plate.classList.add("has-custom-plate");
     }
     if (cart) {
       const shell = getCaseShell();
@@ -451,7 +771,7 @@
     document.getElementById("r_delete").hidden = !r;
     document.getElementById("r_err").hidden = true;
     updatePlatePreview();
-    dlgR.showModal();
+    showEditor(dlgR);
   }
 
   const plateCssEl = document.getElementById("r_plate_css");
@@ -587,18 +907,252 @@
     }
   };
 
+  /* ── Editors as full pages ────────────────────────────────
+     Same <form>s, same fields/ids, same submit + delete handlers and API
+     calls as before. Only the container changed: the dialog now opens
+     in-page (show) instead of as a tiny modal (showModal). */
+  let editorCtx = null;
+
+  function editorSnapshot(form) {
+    return Array.from(form.elements)
+      .filter((el) => el.id)
+      .map((el) => el.id + "=" + (el.type === "checkbox" ? el.checked : el.value))
+      .join("\u0001");
+  }
+
+  function editorDirty(dlg) {
+    const form = dlg === dlgR ? formR : formP;
+    return !!(dlg.open && dlg._rcSnap != null && editorSnapshot(form) !== dlg._rcSnap);
+  }
+
+  function autoGrow(ta) {
+    if (!ta || !ta.isConnected) return;
+    ta.style.height = "auto";
+    ta.style.height = ta.scrollHeight + 2 + "px";
+  }
+
+  function editorCrumbs(parts) {
+    return parts
+      .map((pt) =>
+        pt.go
+          ? `<button type="button" class="rc-crumb" data-ed-go="${esc(pt.go)}">${esc(pt.label)}</button>`
+          : `<span class="rc-crumb-here" aria-current="page">${esc(pt.label)}</span>`
+      )
+      .join(`<span class="rc-crumb-sep" aria-hidden="true">›</span>`);
+  }
+
+  function showEditor(dlg) {
+    const isRom = dlg === dlgR;
+    const form = isRom ? formR : formP;
+    const rid = isRom ? document.getElementById("r_id").value : "";
+    const pid = isRom ? document.getElementById("r_producer").value : document.getElementById("p_id").value;
+    const p = pid ? producerById(pid) : null;
+    const r = rid ? romById(rid) : null;
+    editorCtx = {
+      kind: isRom ? "rom" : "producer",
+      romId: rid || null,
+      producerId: pid || null,
+      isNew: isRom ? !rid : !pid,
+      ids: ((isRom ? data.roms : data.producers) || []).map((x) => x.id),
+      route: null,
+    };
+
+    const parts = [{ label: "Producers", go: "home" }];
+    if (isRom) {
+      if (p) parts.push({ label: p.name || p.id, go: "producer:" + p.id });
+      if (r) parts.push({ label: r.name || r.id, go: "rom:" + r.id });
+      parts.push({ label: r ? "Edit" : "New ROM" });
+    } else if (p) {
+      parts.push({ label: p.name || p.id, go: "producer:" + p.id }, { label: "Edit" });
+    } else {
+      parts.push({ label: "New producer" });
+    }
+    const nav = document.getElementById(isRom ? "r_crumbs" : "p_crumbs");
+    if (nav) nav.innerHTML = editorCrumbs(parts);
+    const sub = document.getElementById(isRom ? "r_sub" : "p_sub");
+    if (sub) {
+      sub.textContent = isRom
+        ? r
+          ? (r.name || r.id) + (p ? " · " + p.name : "")
+          : p
+          ? "New ROM for " + p.name
+          : "New ROM"
+        : p
+        ? p.name || p.id
+        : "A new maker for the catalog";
+    }
+    dlg.style.setProperty("--hue", producerHue(pid));
+
+    // the form becomes the page
+    viewProducers.hidden = true;
+    viewProducer.hidden = true;
+    if (viewRom) viewRom.hidden = true;
+
+    // own URL so refresh stays in the editor
+    writeNav(pid || "");
+    const hash = isRom
+      ? rid
+        ? "#edit-r=" + encodeURIComponent(rid)
+        : "#new-r=" + encodeURIComponent(pid)
+      : pid
+      ? "#edit-p=" + encodeURIComponent(pid)
+      : "#new-p";
+    try {
+      const u = new URL(window.location.href);
+      history.replaceState(null, "", u.pathname + u.search + hash);
+    } catch (e) {
+      /* */
+    }
+
+    if (!dlg.open) dlg.show();
+    form.querySelectorAll("textarea").forEach(autoGrow);
+    dlg._rcSnap = editorSnapshot(form);
+    const first = document.getElementById(isRom ? "r_name" : "p_name");
+    if (first) first.focus({ preventScroll: true });
+    const main = document.querySelector(".rc-main");
+    if (main) main.scrollTop = 0;
+  }
+
+  function leaveEditor(dlg, route) {
+    if (editorDirty(dlg) && !confirm("Discard your unsaved changes?")) return false;
+    if (editorCtx) editorCtx.route = route || null;
+    dlg._rcSnap = null;
+    dlg.close();
+    return true;
+  }
+
+  function afterEditorClose(dlg) {
+    const ctx = editorCtx;
+    editorCtx = null;
+    dlg._rcSnap = null;
+    returnToRomAfterEdit = null;
+    if (!data) return;
+    const route = (ctx && ctx.route) || "";
+    if (route === "home") return showProducers();
+    if (route.startsWith("producer:") && producerById(route.slice(9))) return openProducer(route.slice(9));
+    if (route.startsWith("rom:") && romById(route.slice(4))) return showRom(route.slice(4));
+    if (ctx && ctx.kind === "rom") {
+      if (ctx.romId && romById(ctx.romId)) return showRom(ctx.romId);
+      if (ctx.isNew) {
+        const fresh = (data.roms || []).find((x) => !ctx.ids.includes(x.id));
+        if (fresh) return showRom(fresh.id);
+      }
+      const pid = ctx.producerId || openProducerId;
+      if (pid && producerById(pid)) return openProducer(pid);
+      return showProducers();
+    }
+    if (ctx && ctx.kind === "producer") {
+      if (ctx.producerId && producerById(ctx.producerId)) return openProducer(ctx.producerId);
+      if (ctx.isNew) {
+        const fresh = (data.producers || []).find((x) => !ctx.ids.includes(x.id));
+        if (fresh) return openProducer(fresh.id);
+      }
+      return showProducers();
+    }
+    if (openProducerId && producerById(openProducerId)) openProducer(openProducerId);
+    else showProducers();
+  }
+
+  dlgR.addEventListener("close", () => afterEditorClose(dlgR));
+  dlgP.addEventListener("close", () => afterEditorClose(dlgP));
+
+  [
+    [formR, dlgR, "r_cancel"],
+    [formP, dlgP, "p_cancel"],
+  ].forEach(([form, dlg, cancelId]) => {
+    // unsaved-changes guard runs before the existing cancel handler
+    form.addEventListener(
+      "click",
+      (e) => {
+        const t = e.target instanceof Element ? e.target : null;
+        if (!t) return;
+        if (t.closest("#" + cancelId)) {
+          if (editorDirty(dlg) && !confirm("Discard your unsaved changes?")) {
+            e.stopPropagation();
+            e.preventDefault();
+          } else {
+            dlg._rcSnap = null;
+          }
+          return;
+        }
+        const go = t.closest("[data-ed-go]");
+        if (go) {
+          e.preventDefault();
+          leaveEditor(dlg, go.getAttribute("data-ed-go"));
+        }
+      },
+      true
+    );
+    form.addEventListener("input", (e) => {
+      if (e.target && e.target.tagName === "TEXTAREA") autoGrow(e.target);
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || e.defaultPrevented) return;
+    const dlg = dlgR.open ? dlgR : dlgP.open ? dlgP : null;
+    if (!dlg) return;
+    e.preventDefault();
+    const btn = document.getElementById(dlg === dlgR ? "r_cancel" : "p_cancel");
+    if (btn) btn.click();
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (editorDirty(dlgR) || editorDirty(dlgP)) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    const dlg = dlgR.open ? dlgR : dlgP.open ? dlgP : null;
+    if (dlg) dlg.querySelectorAll("textarea").forEach(autoGrow);
+  });
+
+  /** Refresh while editing: #edit-r= / #new-r= / #edit-p= / #new-p */
+  function resumeEditor(h) {
+    let m;
+    if ((m = h.match(/^edit-r=(.+)$/))) {
+      const r = romById(decodeURIComponent(m[1]));
+      if (r) {
+        showRom(r.id);
+        openRomForm(r);
+      }
+    } else if ((m = h.match(/^new-r=(.+)$/))) {
+      const pid = decodeURIComponent(m[1]);
+      if (producerById(pid)) {
+        openProducer(pid);
+        openRomForm(null);
+      }
+    } else if ((m = h.match(/^edit-p=(.+)$/))) {
+      const p = producerById(decodeURIComponent(m[1]));
+      if (p) {
+        openProducer(p.id);
+        openProducerForm(p);
+      }
+    } else if (h === "new-p") {
+      showProducers();
+      openProducerForm(null);
+    }
+  }
+
   fetch("/api/catalog?_=" + Date.now())
     .then((r) => r.json())
     .then((j) => {
       data = j;
       setKicker();
       // Restore bay after refresh (hash / ?p= / localStorage) — stay where you were editing
+      const edHash = (window.location.hash || "").replace(/^#/, "");
       const resume = readNavProducerId();
-      if (resume && producerById(resume)) {
+      const resumeRom = readNavRomId();
+      if (resumeRom && romById(resumeRom)) {
+        showRom(resumeRom);
+      } else if (resume && producerById(resume)) {
         openProducer(resume);
       } else {
         showProducers();
       }
+      resumeEditor(edHash);
     })
     .catch((e) => {
       if (kicker) kicker.textContent = "catalog locked: " + e.message;
@@ -607,9 +1161,15 @@
   // Browser back/forward between home and a producer bay
   window.addEventListener("hashchange", () => {
     if (!data) return;
+    if (dlgR.open || dlgP.open) return;
+    const romHash = readNavRomId();
+    if (romHash && romById(romHash)) {
+      if (openRomId !== romHash) showRom(romHash);
+      return;
+    }
     const resume = readNavProducerId();
     if (resume && producerById(resume)) {
-      if (openProducerId !== resume) openProducer(resume);
+      if (openProducerId !== resume || openRomId) openProducer(resume);
     } else if (openProducerId) {
       showProducers();
     }

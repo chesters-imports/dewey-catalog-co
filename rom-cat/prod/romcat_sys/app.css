@@ -35,7 +35,7 @@ body {
 
 /* 800×600: readable density (was too zoomed-out at 12.5) */
 html {
-  font-size: 14.5px;
+  font-size: 18px;
 }
 
 body.rc {
@@ -463,7 +463,7 @@ body.rc.theme-toystore .rc-bg-line {
   margin: 0;
   padding: 0.65rem 0.45rem 0.75rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(7.6rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
   gap: 0.65rem 0.5rem;
   align-items: start;
   background:
@@ -484,9 +484,9 @@ body.rc.theme-toystore .rc-bg-line {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 11.2rem;
-  min-height: 11.2rem;
-  max-height: 11.2rem;
+  height: 13.2rem;
+  min-height: 13.2rem;
+  max-height: 13.2rem;
   padding: 0.45rem 0.3rem 0.35rem;
   margin: 0;
   text-align: center;
@@ -507,7 +507,7 @@ body.rc.theme-toystore .rc-bg-line {
 /* soft hang tab — toy blister, not industrial bolt */
 .rc-rom-peg {
   position: absolute;
-  top: 0.45rem;
+  top: 0.22rem;
   left: 50%;
   width: 1.5rem;
   height: 0.28rem;
@@ -523,7 +523,7 @@ body.rc.theme-toystore .rc-bg-line {
 
 /* footprint / plate / pins: rom-cart-face.css (shared with Launcher) */
 .rc-rom-face {
-  margin: 0.35rem auto 0.3rem;
+  margin: 0.55rem auto 0.3rem;
   flex: 0 0 auto;
 }
 
@@ -798,7 +798,7 @@ body.rc.theme-toystore .rc-bg-line {
   background:
     radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.9), rgba(220, 228, 248, 0.7));
   text-align: center;
-  min-width: 7.5rem;
+  min-width: 9.2rem;
 }
 .rc-plate-preview-lab {
   font-family: var(--mono);

@@ -1,0 +1,297 @@
+/* ROM Cat · rom-page.css
+   Viewing layer only: readable ROM page, producer "about" drawer, breadcrumbs.
+   Does NOT paint cases/plates (that stays in rom-cart-face.css + plate_css)
+   and does NOT touch the editor dialog. */
+
+/* ── breadcrumbs ─────────────────────────────────────────── */
+.rc-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0.1rem 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+  min-width: 0;
+}
+.rc-crumb {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--tab);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rc-crumb:hover {
+  color: var(--candy);
+}
+.rc-crumb-sep {
+  opacity: 0.55;
+}
+.rc-crumb-here {
+  color: var(--ink);
+  font-weight: 600;
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── ROM page header: case + title + actions ─────────────── */
+.rc-rp-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem 1rem;
+  align-items: start;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  box-shadow: 0 3px 0 rgba(90, 100, 160, 0.1), 0 6px 14px rgba(40, 50, 90, 0.06);
+}
+.rc-rp-face {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.3rem 0.6rem 0.6rem;
+  border: 1px dashed #b8c4e8;
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 30%, #ffffff, rgba(220, 228, 248, 0.8));
+}
+/* same case, a little bigger than the shelf (size is room-owned, see rom-cart-face.css) */
+.rc-rom-page .rc-rp-face .rc-rom-face.rc-plate-preview-cart {
+  --cart-w: 7.6rem;
+  --cart-h: 8.8rem;
+  margin: 0.25rem auto 0;
+}
+.rc-rp-kicker {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.rc-rp-name {
+  margin: 0.1rem 0 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  color: #1a2238;
+  overflow-wrap: anywhere;
+}
+.rc-rp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0.4rem 0 0;
+}
+.rc-rp-sku {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: #3a48a8;
+  background: #eef1ff;
+  border: 1px solid #c8d0f0;
+  border-radius: 3px;
+  padding: 0.1rem 0.3rem;
+  overflow-wrap: anywhere;
+}
+.rc-rp-tag {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.3rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: #f4f6fc;
+  color: #4a5270;
+}
+.rc-rp-tag.is-on {
+  background: #e4f8ee;
+  border-color: #7ad0a0;
+  color: #1a6a40;
+}
+.rc-rp-summary {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #2a3250;
+}
+.rc-rp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+.rc-rp-actions .rc-btn {
+  font-size: 0.68rem;
+  padding: 0.4rem 0.75rem;
+}
+
+/* ── "On file" sheet: every stored field, readable ───────── */
+.rc-rp-sheet {
+  margin-top: 0.65rem;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem 0.6rem;
+}
+.rc-rp-sheet-h {
+  margin: 0 0 0.2rem;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #2a3460;
+}
+.rc-fields {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(7rem, 10.5rem) minmax(0, 1fr);
+}
+.rc-fields > dt,
+.rc-fields > dd {
+  margin: 0;
+  padding: 0.45rem 0;
+  border-top: 1px solid #e4e9f5;
+}
+.rc-fields > dt:first-of-type,
+.rc-fields > dt:first-of-type + dd {
+  border-top: none;
+}
+.rc-fields > dt {
+  padding-right: 0.8rem;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  line-height: 1.5;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #5a6484;
+}
+.rc-fields > dd {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ink);
+  min-width: 0;
+}
+.rc-fields-nested {
+  grid-template-columns: minmax(5rem, 8rem) minmax(0, 1fr);
+}
+.rc-fields-nested > dt,
+.rc-fields-nested > dd {
+  padding: 0.2rem 0;
+}
+.rc-prose {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.rc-mono {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+}
+.rc-code {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+  background: #141a2c;
+  color: #e8ecff;
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+}
+.rc-empty-val {
+  color: #7a82a0;
+  font-style: italic;
+  font-size: 0.7rem;
+}
+.rc-note {
+  color: #6a7494;
+  font-size: 0.66rem;
+}
+.rc-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.rc-swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-right: 0.35rem;
+  vertical-align: -0.12rem;
+  border-radius: 2px;
+  background: var(--sw, #888);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+/* ── producer page: full "about" drawer under the compact strip ── */
+.rc-bay-more {
+  margin-top: 0.2rem;
+}
+.rc-bay-more > summary {
+  display: block;
+  cursor: pointer;
+  list-style: none;
+}
+.rc-bay-more > summary::-webkit-details-marker {
+  display: none;
+}
+.rc-bay-more > summary::before {
+  content: "▸ about · ";
+  color: var(--tab);
+  font-weight: 600;
+}
+.rc-bay-more[open] > summary::before {
+  content: "▾ about";
+  color: var(--tab);
+}
+.rc-bay-more[open] > summary .rc-bay-more-peek {
+  display: none;
+}
+.rc-bay-more > .rc-fields {
+  margin-top: 0.3rem;
+  padding-top: 0.2rem;
+  border-top: 1px dashed rgba(100, 120, 180, 0.3);
+}
+
+/* ROM cards now open the readable page */
+.rc-rom-product:focus-visible,
+.rc-crumb:focus-visible,
+.rc-btn:focus-visible,
+.rc-bay-more > summary:focus-visible {
+  outline: 2px solid #5c6ee8;
+  outline-offset: 2px;
+}
+
+/* statuses that exist in the data but had no chip colour */
+.rc-status[data-s="live"] {
+  background: #e4f8ee;
+  border-color: #7ad0a0;
+  color: #1a7a48;
+}
+.rc-status[data-s="archive"] {
+  background: #ececf0;
+  border-color: #b0b0b8;
+  color: #585860;
+}
+
+@media (max-width: 560px) {
+  .rc-rp-head {
+    grid-template-columns: 1fr;
+  }
+  .rc-fields {
+    grid-template-columns: 1fr;
+  }
+  .rc-fields > dd {
+    border-top: none;
+    padding-top: 0;
+  }
+}

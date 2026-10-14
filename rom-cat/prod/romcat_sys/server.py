@@ -1,12 +1,13 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-ROM Cat · CO.DCC-001-ROMCAT
+ROM Cat Â· CO.DCC-001-ROMCAT
 Catalog of producers and their ROM SKUs.
 Built from DCO REQ. Library card energy. Not a sticky board.
 """
 
 from __future__ import annotations
 
+import os
 import json
 import re
 import secrets
@@ -18,8 +19,8 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data" / "catalog.json"
-HOST = "127.0.0.1"
-PORT = 43132
+HOST = os.environ.get("ROMCAT_HOST", "0.0.0.0")
+PORT = int(os.environ.get("ROMCAT_PORT", "43132"))
 
 
 def load_catalog() -> dict[str, Any]:
@@ -159,9 +160,11 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             if not rid:
                 rid = slug_id(name)
-            status = (payload.get("status") or "idea").strip().lower()
-            if status not in ("idea", "desk", "shipped", "mausoleum", "broken"):
-                status = "idea"
+            status = (payload.get("status") or "").strip().lower()
+            if status not in ("idea", "desk", "live", "shipped", "mausoleum", "broken", "archive"):
+                # blank / unknown from the form: keep the status already on file (new ROM -> idea)
+                _prev = next((r for r in roms if r.get("id") == rid), None)
+                status = str((_prev or {}).get("status") or "idea")
             launcher_show = payload.get("launcher_show")
             if isinstance(launcher_show, str):
                 launcher_show = launcher_show.lower() in ("1", "true", "yes", "on")
@@ -185,7 +188,7 @@ class Handler(SimpleHTTPRequestHandler):
             # so hide/show toggle does not wipe custom plates.
             if "plate_css" in payload:
                 pc = str(payload.get("plate_css") or "").strip()
-                # light guard — declarations only, desk-local
+                # light guard â€” declarations only, desk-local
                 low = pc.lower()
                 if any(
                     b in low
@@ -262,7 +265,7 @@ def main() -> None:
         save_catalog(load_catalog())
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
     print(f"ROM Cat  http://{HOST}:{PORT}/")
-    print(f"SKU CO.DCC-001-ROMCAT · drawer {DATA}")
+    print(f"SKU CO.DCC-001-ROMCAT Â· drawer {DATA}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
